@@ -1,0 +1,39 @@
+name: Sync tested ALT-e preview
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/sync-preview.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: preview-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - name: Copy the tested development branch
+        env:
+          SOURCE_SHA: 57d16618db818b9e97234282ab7ee253665e97d3
+        run: |
+          set -euo pipefail
+          git clone --no-checkout --single-branch --branch part5/finalisation https://github.com/CrawlinUK/Also-Lets-Try.git "$RUNNER_TEMP/alte-source"
+          mkdir -p "$RUNNER_TEMP/alte-release"
+          git -C "$RUNNER_TEMP/alte-source" archive "$SOURCE_SHA" | tar -x -C "$RUNNER_TEMP/alte-release"
+          rsync -a --delete --exclude='/.git/' --exclude='/.github/' "$RUNNER_TEMP/alte-release/" ./
+          touch .nojekyll
+          test -f index.html
+          test -f unit.html
+          test -f js/theme.js
+          test -f css/classroom-lights.css
+          git add -A
+          git config user.name "ALT-e preview sync"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Sync tested ALT-e v75 preview from $SOURCE_SHA"
+            git push origin main
+          fi
