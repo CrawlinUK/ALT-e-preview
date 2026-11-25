@@ -1,4 +1,4 @@
-/* A single loading title: hold for 1.5s, then fade for 0.5s once ready. */
+/* LD-unit: actual loading. TL-unit: independent introductory overlay. */
 (function (global) {
   "use strict";
   function formatTitle(config) {
@@ -10,32 +10,42 @@
   function create({ document, setTimer, clearTimer }) {
     const screen = document.getElementById("loadingScreen");
     const title = document.getElementById("loadingTitle");
+    const overlay = document.getElementById("titleOverlay");
+    const introTitle = document.getElementById("introTitle");
     const label = document.getElementById("loadingLabel");
-    let holdTimer = null, minimumMet = false, loaded = false, failed = false, fading = false;
-    function finish() {
-      if (!screen || failed || fading || !minimumMet || !loaded) return;
-      fading = true;
-      screen.classList.add("loading-complete");
-      setTimer(() => screen.remove(), 500);
-    }
+    let started = false, loaded = false, failed = false;
+    let holdTimer = null, fadeTimer = null;
+
     function showTitle(value) {
-      if (failed || fading || holdTimer !== null || minimumMet) return;
+      if (started || failed) return;
+      started = true;
       if (title) title.textContent = value;
+      if (introTitle) introTitle.textContent = value;
+      if (!overlay) return;
+      overlay.hidden = false;
       holdTimer = setTimer(() => {
         holdTimer = null;
-        minimumMet = true;
-        finish();
+        overlay.classList.add("title-fading");
+        fadeTimer = setTimer(() => {
+          fadeTimer = null;
+          overlay.remove();
+        }, 500);
       }, 1500);
     }
+
     function ready() {
-      if (failed) return;
+      if (failed || loaded) return;
       loaded = true;
-      if (screen) screen.classList.add("loading-ready");
-      finish();
+      // Never delay the actual classroom for the title animation.
+      if (screen) screen.remove();
     }
+
     function error() {
+      if (loaded || failed) return;
       failed = true;
       if (holdTimer !== null) clearTimer(holdTimer);
+      if (fadeTimer !== null) clearTimer(fadeTimer);
+      if (overlay) overlay.remove();
       if (label) label.textContent = "Could not load";
       if (screen) screen.classList.add("loading-error");
     }

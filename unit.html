@@ -14,20 +14,30 @@
   <link rel="preload" href="images/ui/AlsoNewWindowIcon.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
   <link rel="preload" href="images/ui/AlsoCogSettings.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
   <style>
-    #loadingScreen {
+    /* LD-unit and TL-unit share the same full-screen geometry. Only LD-unit
+       has a background and captures input; TL-unit is transparent. */
+    #loadingScreen,
+    #titleOverlay {
       position: fixed;
-      z-index: 9999;
       inset: 0;
       display: grid;
       place-items: center;
-      background: #f8fbfa;
+    }
+    #loadingScreen {
+      z-index: 9999;
+      background: var(--page, #f8fbfa);
+    }
+    #titleOverlay {
+      z-index: 10000;
+      pointer-events: none;
       opacity: 1;
       transition: opacity .5s ease;
     }
-    #loadingScreen.loading-complete {
+    #titleOverlay.title-fading {
       opacity: 0;
-      pointer-events: none;
     }
+    #titleOverlay[hidden] { display: none !important; }
+    #titleOverlay .loading-cogs { visibility: hidden; }
     .loading-panel {
       display: grid;
       justify-items: center;
@@ -37,15 +47,25 @@
       width: min(92vw, 1100px);
       text-align: center;
     }
-    #loadingTitle {
+    .unit-intro-title {
       margin: 0;
       font-family: "HandwritingWeCan", Arial, sans-serif;
       font-size: clamp(38px, 7vw, 100px);
       line-height: 1.2;
       overflow-wrap: anywhere;
       font-weight: 700;
+      /* Keep the title legible over either theme and colourful flashcards.
+         Identical outline on both layers avoids a visible jump. */
+      -webkit-text-stroke: 3px var(--page, #f8fbfa);
+      paint-order: stroke fill;
     }
-    #loadingScreen.loading-ready .loading-cogs { visibility: hidden; }
+    #loadingLabel {
+      position: absolute;
+      top: calc(50% + 112px);
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
     #loadingLabel:empty { display: none; }
     .loading-cogs {
       position: relative;
@@ -96,20 +116,26 @@
       .loading-cog { animation-duration: 6s; }
     }
   </style>
-  <link rel="stylesheet" href="css/classroom.css?v=20261125-alte-v81">
-  <script src="js/loading-intro.js?v=20261125-alte-v81" defer></script>
-  <script src="js/unit-loader.js?v=20261125-alte-v81" defer></script>
-  <script src="js/theme.js?v=20261125-alte-v81"></script>
+  <link rel="stylesheet" href="css/classroom.css?v=20261125-alte-v81.1">
+  <script src="js/loading-intro.js?v=20261125-alte-v81.1" defer></script>
+  <script src="js/unit-loader.js?v=20261125-alte-v81.1" defer></script>
+  <script src="js/theme.js?v=20261125-alte-v81.1"></script>
 </head>
 <body>
   <div id="loadingScreen" role="status" aria-live="polite" aria-label="Loading">
     <div class="loading-panel">
-      <h1 id="loadingTitle">ALT-e</h1>
+      <h1 id="loadingTitle" class="unit-intro-title">ALT-e</h1>
       <div class="loading-cogs" aria-hidden="true">
         <div class="loading-cog">⚙</div>
         <div class="loading-cog">⚙</div>
       </div>
-      <div id="loadingLabel"></div>
+    </div>
+    <div id="loadingLabel" aria-live="assertive"></div>
+  </div>
+  <div id="titleOverlay" aria-hidden="true" hidden>
+    <div class="loading-panel">
+      <h1 id="introTitle" class="unit-intro-title"></h1>
+      <div class="loading-cogs" aria-hidden="true"></div>
     </div>
   </div>
   <div id="alteApp"></div>
