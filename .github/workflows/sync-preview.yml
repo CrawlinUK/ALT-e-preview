@@ -18,7 +18,7 @@ jobs:
           ref: main
       - name: Copy the tested development branch
         env:
-          SOURCE_SHA: 57d16618db818b9e97234282ab7ee253665e97d3
+          SOURCE_SHA: 2f0c359adc96f7ba3e7cd0a76c6bfbf5594aab5e
         run: |
           set -euo pipefail
           git clone --no-checkout --single-branch --branch part5/finalisation https://github.com/CrawlinUK/Also-Lets-Try.git "$RUNNER_TEMP/alte-source"
@@ -34,6 +34,6 @@ jobs:
           git config user.name "ALT-e preview sync"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if ! git diff --cached --quiet; then
-            git commit -m "Sync tested ALT-e v75 preview from $SOURCE_SHA"
+            git commit -m "Sync tested ALT-e v75.1 preview from $SOURCE_SHA"
             git push origin main
           fi
