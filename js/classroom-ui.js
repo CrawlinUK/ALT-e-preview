@@ -73,11 +73,14 @@
     const flashcard = document.querySelector(".flashcard");
     if (!flashcard) return;
     const rect = flashcard.getBoundingClientRect();
-    ["previousButton", "nextButton"].forEach((id) => {
+    const controls = [document.getElementById("menuButton"), document.querySelector(".site-header-inner .alte-lights-toggle")];
+    ["previousButton", "nextButton"].forEach((id, index) => {
       const button = document.getElementById(id);
       if (!button || button.hidden) return;
-      button.style.top = rect.top + "px";
-      button.style.height = rect.height + "px";
+      const corner = controls[index]?.getBoundingClientRect();
+      const top = Math.max(0, rect.top, corner ? corner.bottom + 8 : 0);
+      button.style.top = top + "px";
+      button.style.height = Math.max(0, Math.min(rect.bottom, window.innerHeight) - top) + "px";
     });
   }
 

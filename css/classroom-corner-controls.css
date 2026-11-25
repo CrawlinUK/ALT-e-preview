@@ -1,0 +1,71 @@
+/* v81 — no permanent title bar; corner controls sit in the existing side gutters. */
+html.shared-unit-template[data-unit],
+html.shared-unit-template[data-unit].is-fullscreen {
+  --header-height: 0px;
+}
+html.shared-unit-template[data-unit] .site-header,
+html.shared-unit-template[data-unit].game-focus .site-header,
+html.shared-unit-template[data-unit].is-fullscreen:not(.game-focus) .site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  z-index: 120;
+  pointer-events: none;
+}
+html.shared-unit-template[data-unit] .site-header::after { display: none; }
+html.shared-unit-template[data-unit] .site-header-inner,
+html.shared-unit-template[data-unit].game-focus .site-header-inner {
+  display: block;
+  width: 100%;
+  height: 0;
+  position: relative;
+  padding: 0 !important;
+}
+html.shared-unit-template[data-unit] :is(.site-title,.game-title) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+html.shared-unit-template[data-unit] .site-header-inner .menu-button,
+html.shared-unit-template[data-unit] .site-header-inner .alte-lights-toggle {
+  position: absolute;
+  top: 10px;
+  width: 48px;
+  min-height: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+}
+html.shared-unit-template[data-unit] .site-header-inner .menu-button { left: 12px; }
+html.shared-unit-template[data-unit] .site-header-inner .alte-lights-toggle { right: 12px; }
+html.shared-unit-template[data-unit] .site-header-inner .alte-lights-label { display: none; }
+html.shared-unit-template[data-unit] .site-header-inner .alte-lights-toggle svg { width: 27px; height: 27px; }
+html.shared-unit-template[data-unit] .app {
+  height: var(--viewport-height);
+}
+html.shared-unit-template[data-unit].is-ipad.is-fullscreen .site-header-inner .menu-button { top: 55px; }
+html.shared-unit-template[data-unit].is-ipad.is-fullscreen .flash-board-bin { top: max(112px, 13vh); }
+@media (max-width:650px) {
+  html.shared-unit-template[data-unit] .site-header-inner .menu-button,
+  html.shared-unit-template[data-unit] .site-header-inner .alte-lights-toggle {
+    top: 8px;
+    width: 42px;
+    min-height: 42px;
+    height: 42px;
+  }
+  html.shared-unit-template[data-unit] .site-header-inner .menu-button { left: 7px; }
+  html.shared-unit-template[data-unit] .site-header-inner .alte-lights-toggle { right: 7px; }
+  html.shared-unit-template[data-unit].is-ipad.is-fullscreen .site-header-inner .menu-button { top: 55px; }
+}

@@ -1,5 +1,4 @@
 /* Classroom night palette — preserve white artwork and the light drawing canvas. */
-html.shared-unit-template.game-focus .site-header-inner .alte-lights-toggle { display:none; }
 html.shared-unit-template .site-header-inner .alte-lights-toggle { margin-left:auto; }
 html.shared-unit-template .settings-heading .alte-lights-toggle { margin-left:auto; }
 html[data-theme="dark"].shared-unit-template :is(.game-title,.keyboard-help,.missing-answer-hints,.guess-tap-prompt) { color:var(--muted); }

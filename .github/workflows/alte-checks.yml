@@ -1,0 +1,62 @@
+name: ALT-e checks
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'part5/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        id: syntax
+        run: |
+          find js config tests -name '*.js' -print0 | xargs -0 -n 1 node --check
+          node --check sw.js
+      - name: Grid Games checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/grid-games.test.js
+      - name: Guessing Game checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/guessing-game.test.js
+      - name: Flash Cards checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/flash-cards.test.js
+      - name: Flash Board checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/flash-board.test.js
+      - name: Drawing tools checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/drawing-tools.test.js
+      - name: Settings checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/settings.test.js
+      - name: Shared classroom checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/shared-classroom.test.js
+      - name: CSS structure checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/css-structure.test.js
+      - name: Lights Off checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/theme.test.js
+      - name: Loading intro checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/loading-intro.test.js
+      - name: Vocabulary checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/vocabulary-data.test.js
+      - name: Jobs category checks
+        if: ${{ !cancelled() && steps.syntax.outcome == 'success' }}
+        run: node tests/jobs-category.test.js

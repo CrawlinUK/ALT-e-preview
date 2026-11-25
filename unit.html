@@ -22,7 +22,7 @@
       place-items: center;
       background: #f8fbfa;
       opacity: 1;
-      transition: opacity .24s ease;
+      transition: opacity .5s ease;
     }
     #loadingScreen.loading-complete {
       opacity: 0;
@@ -34,7 +34,19 @@
       gap: 16px;
       color: #263238;
       font-family: Arial, sans-serif;
+      width: min(92vw, 1100px);
+      text-align: center;
     }
+    #loadingTitle {
+      margin: 0;
+      font-family: "HandwritingWeCan", Arial, sans-serif;
+      font-size: clamp(38px, 7vw, 100px);
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+      font-weight: 700;
+    }
+    #loadingScreen.loading-ready .loading-cogs { visibility: hidden; }
+    #loadingLabel:empty { display: none; }
     .loading-cogs {
       position: relative;
       width: 108px;
@@ -84,18 +96,20 @@
       .loading-cog { animation-duration: 6s; }
     }
   </style>
-  <link rel="stylesheet" href="css/classroom.css?v=20261125-alte-v80">
-  <script src="js/unit-loader.js?v=20261125-alte-v80" defer></script>
-  <script src="js/theme.js?v=20261125-alte-v80"></script>
+  <link rel="stylesheet" href="css/classroom.css?v=20261125-alte-v81">
+  <script src="js/loading-intro.js?v=20261125-alte-v81" defer></script>
+  <script src="js/unit-loader.js?v=20261125-alte-v81" defer></script>
+  <script src="js/theme.js?v=20261125-alte-v81"></script>
 </head>
 <body>
   <div id="loadingScreen" role="status" aria-live="polite" aria-label="Loading">
     <div class="loading-panel">
+      <h1 id="loadingTitle">ALT-e</h1>
       <div class="loading-cogs" aria-hidden="true">
         <div class="loading-cog">⚙</div>
         <div class="loading-cog">⚙</div>
       </div>
-      <div id="loadingLabel">Loading…</div>
+      <div id="loadingLabel"></div>
     </div>
   </div>
   <div id="alteApp"></div>

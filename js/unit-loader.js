@@ -6,7 +6,7 @@
     ? new URL(document.currentScript.src)
     : new URL("js/unit-loader.js", location.href);
   const projectRoot = new URL("../", current);
-  const ASSET_VERSION = "20261125-alte-v80";
+  const ASSET_VERSION = "20261125-alte-v81";
 
   const params = new URLSearchParams(location.search);
   const requestedBook = (params.get("book") || "book1").toLowerCase();
@@ -182,27 +182,16 @@
     });
   }
 
-  function hideLoadingScreen() {
-    const loadingScreen = document.getElementById("loadingScreen");
-    if (!loadingScreen) return;
-    loadingScreen.classList.add("loading-complete");
-    window.setTimeout(() => loadingScreen.remove(), 260);
-  }
-
-  function showLoadingError() {
-    const label = document.getElementById("loadingLabel");
-    const loadingScreen = document.getElementById("loadingScreen");
-    if (label) label.textContent = "Could not load";
-    if (loadingScreen) loadingScreen.classList.add("loading-error");
-  }
-
   window.addEventListener("DOMContentLoaded", async () => {
+    const intro = window.ALTE_LOADING_INTRO.create({ document, setTimer: window.setTimeout.bind(window), clearTimer: window.clearTimeout.bind(window) });
     try {
       await loadScript("js/vocabulary-data.js");
       await loadScript("js/card-factory.js");
       await loadScript(book === "categories" ? "config/categories.js" : `config/units/${book}-unit${unit}.js`);
 
       const config = window.ALTE_UNIT_CONFIG;
+      if (!config) throw new Error("Unit configuration was not loaded");
+      intro.showTitle(window.ALTE_LOADING_INTRO.formatTitle(config));
       // Declarative units name their categories and grammar; the factory builds cards.
       // Existing units with an explicit cards array continue unchanged.
       if (config && !Array.isArray(config.cards) && Array.isArray(config.categories)) {
@@ -251,11 +240,11 @@
       await loadScript("js/classroom-ui.js");
 
       requestAnimationFrame(() => {
-        requestAnimationFrame(hideLoadingScreen);
+        requestAnimationFrame(intro.ready);
       });
     } catch (error) {
       console.error(error);
-      showLoadingError();
+      intro.error();
       const output = document.getElementById("displayText");
       if (output) output.textContent = "UNIT COULD NOT LOAD";
     }

@@ -781,10 +781,11 @@
 
       function alignSideNavigation() {
         const rect = elements.flashcard.getBoundingClientRect();
-        const top = Math.max(0, rect.top);
-        const height = Math.max(80, Math.min(rect.height, window.innerHeight - top));
-
-        [elements.previousButton, elements.nextButton].forEach((button) => {
+        const controls = [elements.menuButton, document.querySelector(".site-header-inner .alte-lights-toggle")];
+        [elements.previousButton, elements.nextButton].forEach((button, index) => {
+          const corner = controls[index]?.getBoundingClientRect();
+          const top = Math.max(0, rect.top, corner ? corner.bottom + 8 : 0);
+          const height = Math.max(0, Math.min(rect.bottom, window.innerHeight) - top);
           button.style.top = `${top}px`;
           button.style.height = `${height}px`;
         });
