@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categories — ALT-e</title>
+<link rel="stylesheet" href="css/menu.css">
+<style>
+.category-menu header{border-bottom:3px solid var(--categories)}
+.category-menu main{max-width:1200px;margin:auto;padding:34px 24px}
+.category-menu .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.category-link{display:block;position:relative;min-width:0;min-height:105px;padding:18px 20px;border:1px solid var(--line);border-left:12px solid var(--categories);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);color:inherit;text-decoration:none}
+.category-link strong,.category-link span{display:block}
+.category-link strong{font-size:25px}
+.category-link .word-samples{max-width:100%;margin-top:5px;color:var(--muted);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+a.category-link:hover,a.category-link:focus-visible{outline:3px solid #8cccf8;outline-offset:2px}
+
+.category-menu .intro{margin:0 0 24px;color:var(--muted);font-size:18px}
+@media(max-width:800px){.category-menu main{padding:20px 14px}.category-menu .grid{grid-template-columns:1fr}}
+</style>
+  <script src="js/theme.js?v=20261125-alte-v75"></script>
+</head>
+<body class="category-menu">
+<header><button class="back" id="back" type="button">◀ Back</button><h1>Categories</h1></header>
+<main id="categoryMain"><p class="intro">Choose a category to practise the picture cards currently in the vocabulary database.</p><section class="grid" id="categoryGrid"></section></main>
+<script src="js/vocabulary-data.js?v=20261125-alte-v75"></script>
+<script>
+(function(){
+  "use strict";
+  const data = window.ALTE_DATA;
+  const grid = document.getElementById("categoryGrid");
+  document.getElementById("back").addEventListener("click",()=>{location.href="index.html";});
+
+  // The menu draws directly from the same category records as the flashcard decks.
+  Object.entries(data.categories).forEach(([id,definition])=>{
+    // Every mapped picture is immediately usable, even in a partial category.
+    const pictureItems = data.getCategoryPictureItems(id);
+    if (!pictureItems.length) return;
+    const card = document.createElement("a");
+    card.className = "category-link";
+    card.href = "unit.html?book=categories&unit=1&category=" + encodeURIComponent(id);
+    const title = document.createElement("strong");
+    title.textContent = definition.label;
+    card.append(title);
+    const wordField = definition.card && definition.card.wordField;
+    const words = pictureItems.slice(0,3).map(item =>
+      (wordField && item[wordField]) || item.word || item.id.replace(/-/g," ")
+    );
+    const samples = document.createElement("span");
+    samples.className = "word-samples";
+    card.append(samples);
+    samples.textContent = words.join(", ");
+    grid.append(card);
+  });
+
+  // CSS ellipsis handles clipping naturally on every viewport size.
+})();
+</script>
+</body>
+</html>

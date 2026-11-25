@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocabulary database — Image editor — ALT-e</title>
+<link rel="stylesheet" href="css/menu.css">
+<style>
+.viewer{max-width:1320px;margin:auto;padding:24px}
+.viewer header{height:auto;border-bottom:3px solid var(--categories)}
+.viewer h1{font-size:clamp(24px,3vw,36px)}
+.viewer-intro{color:var(--muted);margin:0 0 18px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar label{display:grid;gap:4px;font-weight:800;min-width:210px;flex:1}
+.toolbar input,.toolbar select{width:100%;min-height:46px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:white}
+.layout{display:grid;grid-template-columns:minmax(260px,1fr) minmax(310px,1fr);gap:16px}
+.panel{border:1px solid var(--line);border-radius:18px;background:white;padding:16px;min-width:0}
+.list{max-height:65vh;overflow:auto}
+.word-row{display:block;width:100%;background:white;padding:12px;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:7px;font:inherit}
+.word-row:hover,.word-row:focus-visible,.word-row[aria-current=true]{background:#e7f4ff}
+.word-row small{display:block;color:var(--muted);margin-top:3px}
+#preview{position:relative;width:min(280px,100%);aspect-ratio:var(--cell-ratio,1 / 1);margin:12px auto;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;display:grid;place-items:center}
+#previewArt{position:absolute;inset:0;background-repeat:no-repeat;background-position:center;background-size:contain}
+#previewLabel{position:relative;z-index:1;font-size:30px;font-weight:800;text-align:center}
+
+.calibration{margin:10px 0 0;scroll-margin-top:10px}
+.calibration h3{font-size:17px;margin:0 0 6px}
+.editor-shortcuts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.calibration .tool-heading button,.editor-shortcuts button{min-height:40px;padding:8px 12px;border:1px solid #9aadb5;border-radius:9px;background:#f1f7fa;font:inherit;font-weight:800;cursor:pointer}
+.calibration[hidden]{display:none!important}
+.calibration .tool-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.editor-shortcuts button[aria-expanded="true"]{background:#dceeff;border-color:#147cbb;box-shadow:inset 0 0 0 1px #147cbb}
+.calibration .tool-panel{border:1px solid #d6e0e5;border-radius:10px;background:#f9fcfd;padding:12px;margin-bottom:10px}
+.calibration .tool-panel[hidden],.editor-shortcuts[hidden]{display:none!important}
+.calibration .edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.calibration .edit-grid label{display:grid;gap:3px;min-width:0;font-size:13px;font-weight:800}
+.calibration input[type=text],.calibration input[type=number],.calibration select{width:100%;min-width:0;min-height:40px;padding:7px;border:1px solid #9aadb5;border-radius:8px;background:white;font:inherit}
+.calibration input[type=range]{width:100%;accent-color:#147cbb}
+.calibration .scale-row{display:grid;grid-template-columns:minmax(80px,1fr) 80px auto;gap:8px;align-items:center}
+.calibration button{cursor:pointer}
+.calibration .nudge-pad{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,42px);justify-content:center;gap:5px;margin-top:8px}
+.calibration .nudge-pad button{font-size:23px;background:#e8f4ff;border:1px solid #91abc3;border-radius:8px;min-height:40px}
+.calibration .nudge-pad button[data-nudge=up]{grid-column:2;grid-row:1}
+.calibration .nudge-pad button[data-nudge=left]{grid-column:1;grid-row:2}
+.calibration .nudge-pad button[data-nudge=down]{grid-column:2;grid-row:2}
+.calibration .nudge-pad button[data-nudge=right]{grid-column:3;grid-row:2}
+.calibration .flip-row{display:flex;align-items:center;gap:8px;font-weight:800}
+.calibration .fine-step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;margin-top:8px}
+.calibration .fine-step select{width:auto;min-width:95px}
+.editor-actions{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
+.editor-actions .buttons{display:flex;flex-wrap:wrap;gap:8px}
+.editor-actions .buttons button{min-height:42px;padding:8px 12px;border-radius:9px;border:1px solid #9aadb5;background:#f3f8fa;font:inherit;font-weight:800}
+.editor-actions .buttons #exportChanges{background:#def3e7}
+.editor-actions .error{color:#ad2b26;font-weight:800}
+.editor-actions .status{font-size:13px;margin-top:8px}
+.calibration button:focus-visible,.editor-actions button:focus-visible,.calibration input:focus-visible{outline:3px solid #458bea;outline-offset:1px}
+#preview{scroll-margin-top:10px}
+@media(max-width:460px){.calibration .edit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.calibration .tool-tabs button{flex:1 1 42%}}
+
+dl{display:grid;grid-template-columns:120px 1fr;gap:9px;overflow-wrap:anywhere}dt{font-weight:900}dd{margin:0}
+.note{font-size:14px;color:var(--muted)}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.list{max-height:35vh}.viewer{padding:12px}}
+</style>
+</head>
+<body class="viewer">
+<header><button type="button" class="back" onclick="location.href='index.html'">◀ Home</button><h1>Vocabulary database editor</h1></header>
+<main>
+<p class="viewer-intro">Browse the shared vocabulary and preview the exact global sprite positions. Adjust image alignment locally, then export a text file for review. Nothing is saved to GitHub.</p>
+<div class="toolbar"><label>Category<select id="category"></select></label><label>Search words<input id="search" type="search" placeholder="Type a word or ID…"></label></div>
+<p id="count" aria-live="polite"></p>
+<div class="layout">
+<section class="panel list" id="words" aria-label="Vocabulary words"></section>
+<section class="panel" aria-live="polite" id="editorPanel">
+<h2 id="wordTitle">Select a word</h2>
+<div class="calibration" id="calibration" hidden>
+<div class="tool-heading">
+  <strong id="activeToolTitle"></strong>
+  <button type="button" id="closeTool" aria-label="Finish adjusting image and hide controls">Done ✕</button>
+</div>
+<div class="tool-panel" id="toolPosition" role="group" aria-label="Position adjustment" hidden>
+  <div class="edit-grid">
+    <label>Horizontal position<input id="positionX" type="text" spellcheck="false"></label>
+    <label>Vertical position<input id="positionY" type="text" spellcheck="false"></label>
+  </div>
+  <div class="fine-step"><label for="nudgeStep">Move by</label>
+    <select id="nudgeStep"><option value="0.1">0.1%</option><option value="0.5">0.5%</option><option value="1" selected>1%</option><option value="5">5%</option></select>
+  </div>
+  <div class="nudge-pad" aria-label="Nudge image position">
+    <button type="button" data-nudge="up" aria-label="Move image up">↑</button>
+    <button type="button" data-nudge="left" aria-label="Move image left">←</button>
+    <button type="button" data-nudge="down" aria-label="Move image down">↓</button>
+    <button type="button" data-nudge="right" aria-label="Move image right">→</button>
+  </div>
+</div>
+<div class="tool-panel" id="toolSize" role="group" hidden>
+  <label for="scale">Proportional scale — width and height stay linked</label>
+  <div class="scale-row">
+    <input id="scale" type="range" min="25" max="250" step="1" value="100" aria-label="Proportional image scale">
+    <input id="scaleNumber" type="number" min="25" max="250" step="1" value="100" aria-label="Proportional image scale percent">
+    <span>%</span>
+  </div>
+  <p id="effectiveSize" class="note" aria-live="polite"></p>
+</div>
+<div class="tool-panel" id="toolCrop" role="group" hidden>
+  <div class="edit-grid">
+    <label>Crop top (%)<input id="cropTop" type="number" min="0" max="90" step="1" value="0"></label>
+    <label>Crop right (%)<input id="cropRight" type="number" min="0" max="90" step="1" value="0"></label>
+    <label>Crop bottom (%)<input id="cropBottom" type="number" min="0" max="90" step="1" value="0"></label>
+    <label>Crop left (%)<input id="cropLeft" type="number" min="0" max="90" step="1" value="0"></label>
+  </div>
+  <p class="note">Cropping hides the chosen edge of the displayed cell; it does not stretch the artwork.</p>
+</div>
+<div class="tool-panel" id="toolFlip" role="group" hidden>
+  <label class="flip-row"><input type="checkbox" id="flip"> Mirror horizontally</label>
+</div>
+</div>
+<div id="preview"><div id="previewArt"></div><span id="previewLabel" hidden></span></div>
+<dl id="details"></dl><p class="note" id="mappingNote"></p>
+<div class="editor-actions" id="editorActions" hidden>
+  <p class="note">Your picture and image details remain clear until you select a tool below. Tap the same tool again, or Done above, to hide it.</p>
+  <nav class="editor-shortcuts" aria-label="Jump to image controls">
+    <button type="button" data-jump-tool="position" aria-expanded="false" aria-controls="calibration">↑ Position</button>
+    <button type="button" data-jump-tool="size" aria-expanded="false" aria-controls="calibration">↑ Size</button>
+    <button type="button" data-jump-tool="crop" aria-expanded="false" aria-controls="calibration">↑ Crop</button>
+    <button type="button" data-jump-tool="flip" aria-expanded="false" aria-controls="calibration">↑ Flip</button>
+  </nav>
+  <div class="buttons">
+    <button type="button" id="resetCurrent">Reset this word</button>
+    <button type="button" id="exportChanges" disabled>Export changes (.txt)</button>
+  </div>
+  <p id="draftCount" class="note status" aria-live="polite"></p>
+  <p id="editError" class="error" role="status" aria-live="polite"></p>
+</div>
+</section>
+</div>
+</main>
+<script src="js/vocabulary-data.js?v=20261125-alte-v74"></script>
+<script>
+(function(){
+"use strict";
+const db=window.ALTE_DATA;
+if(!db || typeof db.getWordVisual!=="function"){
+  document.getElementById("mappingNote").textContent="Shared vocabulary data could not load. Refresh this page.";
+  return;
+}
+const $=id=>document.getElementById(id);
+const category=$("category"),search=$("search"),words=$("words"),details=$("details");
+const preview=$("preview"),art=$("previewArt"),label=$("previewLabel");
+const title=$("wordTitle"),note=$("mappingNote"),calibration=$("calibration"),actions=$("editorActions");
+const input={
+  x:$("positionX"),y:$("positionY"),step:$("nudgeStep"),
+  scale:$("scale"),scaleNumber:$("scaleNumber"),
+  cropTop:$("cropTop"),cropRight:$("cropRight"),cropBottom:$("cropBottom"),
+  cropLeft:$("cropLeft"),flip:$("flip")
+};
+const error=$("editError"),exportButton=$("exportChanges"),draftCount=$("draftCount");
+const changes=new Map();
+let active=null,tool=null;
+for(const [id,item] of Object.entries(db.categories)){
+  const option=document.createElement("option");
+  option.value=id;option.textContent=item.label;category.append(option);
+}
+const requested=new URLSearchParams(location.search).get("category");
+if(requested && db.categories[requested])category.value=requested;
+
+function row(name,value){
+  const dt=document.createElement("dt"),dd=document.createElement("dd");
+  dt.textContent=name;dd.textContent=String(value);details.append(dt,dd);
+}
+function artwork(categoryId,itemId){
+  const visual=db.getWordVisual(categoryId,itemId);
+  if(!visual)return null;
+  const sheet=Object.entries(db.assets.sheets).find(([,entry])=>db.assetUrl(entry.file)===visual.src);
+  return {...visual,sheetId:sheet?sheet[0]:null,
+    sheetFile:sheet?sheet[1].file:null,
+    cellRatio:sheet?sheet[1].cellAspectRatio:"1 / 1",
+    standalone:visual.size==="contain"};
+}
+function splitPosition(position){
+  const match=String(position||"center center").match(/calc\([^)]*\)|[-+]?\d+(?:\.\d+)?%|(?:left|right|center|top|bottom)/g)||[];
+  return [match[0]||"center",match[1]||"center"];
+}
+function splitSize(size){
+  const match=String(size||"").match(/^\s*(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%\s*$/);
+  return match?[Number(match[1]),Number(match[2])]:[100,100];
+}
+function rounded(n){return Number(n.toFixed(3));}
+function same(a,b){return JSON.stringify(normalize(a))===JSON.stringify(normalize(b))}
+function normalize(v){
+  return {
+    position:v.position,size:v.size,flip:Boolean(v.flip),
+    cropTop:Number(v.cropTop)||0,cropRight:Number(v.cropRight)||0,
+    cropBottom:Number(v.cropBottom)||0,cropLeft:Number(v.cropLeft)||0
+  };
+}
+function showPreview(v){
+  art.replaceChildren();label.hidden=true;label.textContent="";label.style.color="";
+  preview.style.setProperty("--cell-ratio",active?.source?.cellRatio||"1 / 1");
+  art.style.backgroundImage="none";art.style.backgroundSize="contain";
+  art.style.backgroundPosition="center";art.style.transform="none";
+  art.style.clipPath="none";
+  if(!v?.src){label.hidden=false;label.textContent="No image mapped";return}
+  art.style.backgroundImage='url("'+v.src+'")';
+  art.style.backgroundSize=v.size||"contain";
+  art.style.backgroundPosition=v.position||"center";
+  art.style.transform=v.flip?"scaleX(-1)":"none";
+  const c=[v.cropTop,v.cropRight,v.cropBottom,v.cropLeft].map(n=>Number(n)||0);
+  if(c.some(n=>n!==0))art.style.clipPath="inset("+c.map(n=>n+"%").join(" ")+")";
+}
+// The image and database details appear first. Editing controls only show
+// when a shortcut *below* the details is selected, like an on/off switch.
+function hideTool(scrollToPicture=false){
+  tool=null;
+  calibration.hidden=true;
+  for(const name of ["position","size","crop","flip"]){
+    $("tool"+name[0].toUpperCase()+name.slice(1)).hidden=true;
+  }
+  document.querySelectorAll("[data-jump-tool]").forEach(button=>
+    button.setAttribute("aria-expanded","false"));
+  if(scrollToPicture)preview.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function toggleTool(which){
+  if(!active?.source || active.source.standalone)return;
+  if(tool===which && !calibration.hidden){
+    hideTool(true);
+    return;
+  }
+  tool=which;
+  calibration.hidden=false;
+  $("activeToolTitle").textContent=which[0].toUpperCase()+which.slice(1)+" adjustment";
+  for(const name of ["position","size","crop","flip"]){
+    $("tool"+name[0].toUpperCase()+name.slice(1)).hidden=name!==which;
+  }
+  document.querySelectorAll("[data-jump-tool]").forEach(button=>
+    button.setAttribute("aria-expanded",String(button.dataset.jumpTool===which)));
+  calibration.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function counts(){
+  const n=changes.size;draftCount.textContent=n+" unsaved image adjustment"+(n===1?"":"s")+" in this tab.";
+  exportButton.disabled=n===0;
+}
+function fill(v){
+  const [x,y]=splitPosition(v.position);input.x.value=x;input.y.value=y;
+  const base=splitSize(active.source.size),modified=splitSize(v.size);
+  const pct=rounded(100*modified[0]/base[0]);
+  input.scale.value=pct;input.scaleNumber.value=pct;
+  for(const edge of ["cropTop","cropRight","cropBottom","cropLeft"])input[edge].value=Number(v[edge])||0;
+  input.flip.checked=Boolean(v.flip);
+  showEffectiveSize();
+}
+function showEffectiveSize(){
+  const [w,h]=splitSize(active.source.size),z=Number(input.scaleNumber.value)/100;
+  $("effectiveSize").textContent="Original sprite size: "+w+"% × "+h+"%. Current size: "+
+    rounded(w*z)+"% × "+rounded(h*z)+"%. Both dimensions scale together.";
+}
+function edit(){
+  if(!active?.source || active.source.standalone)return;
+  const x=input.x.value.trim(),y=input.y.value.trim(),position=x+" "+y;
+  const positionPart=/^(?:[-+]?\d+(?:\.\d+)?%|calc\([^)]*\)|left|right|top|bottom|center)$/;
+  const scale=Number(input.scaleNumber.value);
+  const crop={};
+  for(const key of ["cropTop","cropRight","cropBottom","cropLeft"])crop[key]=Number(input[key].value);
+  if(!positionPart.test(x)||!positionPart.test(y)
+    ||(window.CSS&&window.CSS.supports&&!window.CSS.supports("background-position",position))
+    ||!Number.isFinite(scale)||scale<25||scale>250
+    ||Object.values(crop).some(n=>!Number.isFinite(n)||n<0||n>90)
+    ||crop.cropTop+crop.cropBottom>=100||crop.cropLeft+crop.cropRight>=100){
+    error.textContent="Check positions, scale (25–250%), and crops (opposite sides must total less than 100%).";
+    return;
+  }
+  error.textContent="";
+  const [bw,bh]=splitSize(active.source.size);
+  const size=scale===100?active.source.size:rounded(bw*scale/100)+"% "+rounded(bh*scale/100)+"%";
+  const v={...active.source,position,size,flip:input.flip.checked,...crop};
+  if(same(v,active.source))changes.delete(active.key);
+  else changes.set(active.key,{category:active.category,id:active.id,sheet:active.source.sheetId,
+    original:normalize(active.source),proposed:normalize(v)});
+  showEffectiveSize();showPreview(v);counts();
+}
+function percentageValue(value){
+  const v=String(value).trim().toLowerCase();
+  const aliases={left:0,top:0,center:50,right:100,bottom:100};
+  if(v in aliases)return aliases[v];
+  if(/^[-+]?\d+(?:\.\d+)?%$/.test(v))return Number(v.slice(0,-1));
+  const compact=v.replace(/\s+/g,"");
+  if(/^calc\([-+]?\d+(?:\.\d+)?%(?:[-+]\d+(?:\.\d+)?%)*\)$/.test(compact)){
+    const parts=compact.slice(5,-1).match(/[-+]?\d+(?:\.\d+)?%/g)||[];
+    return rounded(parts.reduce((sum,item)=>sum+parseFloat(item),0));
+  }
+  return null;
+}
+function nudge(direction){
+  if(!active?.source||active.source.standalone)return;
+  const step=Number(input.step.value)||1;
+  const axis=direction==="up"||direction==="down"?input.y:input.x;
+  const value=percentageValue(axis.value);
+  if(value===null){error.textContent="Cannot nudge this position. Enter a percentage first.";return}
+  // Background sheet is larger than its cell. Increasing background-position
+  // moves artwork up or left, so arrow directions follow the visible image.
+  const delta=direction==="up"||direction==="left"?step:-step;
+  // Horizontal mirroring reverses the visible direction of an X nudge.
+  const flipDirection=(axis===input.x && input.flip.checked)?-1:1;
+  axis.value=rounded(value+delta*flipDirection)+"%";
+  edit();
+}
+function show(categoryId,entry){
+  title.textContent=entry.greeting||entry.word||entry.id.replace(/-/g," ");
+  details.replaceChildren();error.textContent="";
+  row("ID",entry.id);row("Category",db.categories[categoryId].label);
+  row("Default in",(entry.defaultIn||[]).join(", ")||"None");
+  if(entry.country)row("Country",entry.country);
+  if(entry.greeting)row("Greeting",entry.greeting);
+  if(entry.hex)row("Colour",entry.hex);
+  if(entry.word)row("Display word",entry.word);
+  if(entry.forms?.like)row("I like form",entry.forms.like);
+  const source=artwork(categoryId,entry.id),key=categoryId+"/"+entry.id;
+  active={category:categoryId,id:entry.id,key,source};
+  // Every new word starts with its full picture and statistics visible.
+  hideTool();
+  actions.hidden=!source||source.standalone;
+  if(source){
+    row("Image",source.sheetFile||source.src.split("/").pop());
+    if(source.size)row("Sprite size",source.size);
+    if(source.position)row("Position",source.position);
+    if(source.sheetId)row("Sprite sheet",source.sheetId);
+    if(!source.standalone)row("Cell proportions",source.cellRatio);
+    const proposed=changes.get(key)?.proposed;
+    if(!source.standalone)fill(proposed?{...source,...proposed}:source);
+    showPreview(proposed?{...source,...proposed}:source);
+    note.textContent=source.standalone?
+      "Individual image file; no sprite position calibration needed.":
+      "These are the global database settings. Your edits remain local until exported.";
+  }else{
+    row("Image","No shared picture mapping");
+    showPreview(null);
+    label.textContent=entry.hex?"●":(entry.word||entry.greeting||entry.id.replace(/-/g," "));
+    label.style.color=entry.hex||"";
+    note.textContent="This word has no mapped picture; its classroom card may generate text or artwork.";
+  }
+  counts();
+}
+function render(){
+  const cat=category.value,query=search.value.trim().toLowerCase();
+  const items=db.categories[cat].items.filter(entry=>
+    [entry.id,entry.word,entry.greeting,entry.country].filter(Boolean).join(" ").toLowerCase().includes(query));
+  words.replaceChildren();$("count").textContent=items.length+" of "+db.categories[cat].items.length+" words";
+  for(const entry of items){
+    const button=document.createElement("button");button.type="button";button.className="word-row";
+    button.textContent=entry.greeting||entry.word||entry.id.replace(/-/g," ");
+    const small=document.createElement("small");small.textContent=entry.id;button.append(small);
+    button.addEventListener("click",()=>{
+      words.querySelectorAll("button").forEach(b=>b.removeAttribute("aria-current"));
+      button.setAttribute("aria-current","true");show(cat,entry);
+    });words.append(button);
+  }
+  if(items.length)words.firstElementChild.click();
+  else{
+    active=null;title.textContent="No words found";details.replaceChildren();
+    calibration.hidden=actions.hidden=true;art.style.backgroundImage="none";
+    label.hidden=false;label.textContent="No matches";note.textContent="";
+  }
+}
+function exportChanges(){
+  if(!changes.size)return;
+  const lines=["ALT-e — Vocabulary image alignment changes",
+    "Generated: "+new Date().toISOString(),
+    "These are proposed global mappings, NOT changes saved to GitHub.",
+    "Apply approved values in js/vocabulary-data.js after reviewing each word.",""];
+  for(const item of changes.values()){
+    lines.push(item.category+"/"+item.id+" [sheet: "+item.sheet+"]");
+    lines.push("Before: "+JSON.stringify(item.original));
+    lines.push("After:  "+JSON.stringify(item.proposed));
+    lines.push("");
+  }
+  const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  link.href=url;link.download="alte-image-adjustments.txt";
+  document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.querySelectorAll("[data-jump-tool]").forEach(b=>
+  b.addEventListener("click",()=>toggleTool(b.dataset.jumpTool)));
+$("closeTool").addEventListener("click",()=>hideTool(true));
+document.querySelectorAll("[data-nudge]").forEach(b=>
+  b.addEventListener("click",()=>nudge(b.dataset.nudge)));
+for(const name of ["x","y","cropTop","cropRight","cropBottom","cropLeft","flip"])
+  input[name].addEventListener("input",edit);
+input.scale.addEventListener("input",()=>{
+  input.scaleNumber.value=input.scale.value;edit();
+});
+input.scaleNumber.addEventListener("input",()=>{
+  input.scale.value=input.scaleNumber.value;edit();
+});
+$("resetCurrent").addEventListener("click",()=>{
+  if(!active?.source)return;
+  changes.delete(active.key);fill(active.source);
+  error.textContent="";showPreview(active.source);counts();
+});
+exportButton.addEventListener("click",exportChanges);
+category.addEventListener("change",()=>{
+  const url=new URL(location.href);url.searchParams.set("category",category.value);
+  history.replaceState(null,"",url);render();
+});
+search.addEventListener("input",render);
+hideTool();
+render();
+})();
+</script>
+</body>
+</html>

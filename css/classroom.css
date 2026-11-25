@@ -1,0 +1,22 @@
+/* ALT-e classroom styles — import order preserves the original cascade. */
+@import url("theme.css");
+@import url("classroom-base.css");
+@import url("classroom-unit-layout.css");
+@import url("classroom-app-shell.css");
+@import url("classroom-flashcards.css");
+@import url("classroom-generated-visuals.css");
+@import url("classroom-fullscreen.css");
+@import url("classroom-game-menu.css");
+@import url("classroom-settings.css");
+@import url("classroom-number-visuals.css");
+@import url("classroom-guessing-game.css");
+@import url("classroom-responsive.css");
+@import url("classroom-shape-practice.css");
+@import url("classroom-final-controls.css");
+@import url("classroom-unit-overrides.css");
+@import url("classroom-grid-games.css");
+@import url("classroom-flash-board.css");
+@import url("classroom-drawing-tools.css");
+@import url("classroom-board-bin.css");
+@import url("classroom-board-text-tools.css");
+@import url("classroom-lights.css");

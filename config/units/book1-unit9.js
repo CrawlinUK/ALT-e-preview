@@ -1,0 +1,85 @@
+/* Book 1 Unit 9 — Who are you? */
+(function () {
+  "use strict";
+
+  const UNIT_BOOK_ID = "book1";
+  const UNIT_NUMBER = 9;
+  const sheets = ALTE_DATA.assets.sheets;
+  const cells = ALTE_DATA.assets.knownCells;
+
+  // Core vocabulary: the 12 animals of the Chinese zodiac, using the
+  // existing classroom vocabulary/artwork already in the project.
+  const CARD_ORDER = [
+    ["mouse", "mouse"],
+    ["cow", "cow"],
+    ["tiger", "tiger"],
+    ["rabbit", "rabbit"],
+    ["dragon", "dragon"],
+    ["snake", "snake"],
+    ["horse", "horse"],
+    ["sheep", "sheep"],
+    ["monkey", "monkey"],
+    ["chicken", "chicken"],
+    ["dog", "dog"],
+    ["wild-boar", "wild boar"]
+  ];
+
+  function animalVisual(id) {
+    const position = cells.animals[id];
+    if (!position) throw new Error(`Missing Unit 9 animal position for ${id}.`);
+    return {
+      src: ALTE_DATA.assetUrl(sheets.animals.file),
+      size: sheets.animals.backgroundSize,
+      position,
+      flip: false,
+      cropTop: 0
+    };
+  }
+
+  const cards = CARD_ORDER.map(([id, word]) => ({
+    id,
+    category: "animals",
+    word,
+    sentence: `I’m a ${word}.`,
+    alternate: word,
+    optionLabel: word,
+    teacherAnswer: word,
+    textbook: true,
+    visual: animalVisual(id)
+  }));
+
+  window.ALTE_UNIT_CATEGORY_IDS = ["animals"];
+
+  window.ALTE_UNIT_CONFIG = {
+    bookId: UNIT_BOOK_ID,
+    unitNumber: "9",
+    unitTitle: "Who are you?",
+    browserTitle: "Bk1U9 — Who are you?",
+
+    unitColour: "#14A83B",
+    unitNumberColour: "#54BE6D",
+
+    menuFile: "book-1.html",
+
+    defaultPrompt: "I’m a ~",
+    selectionHeading: "Unit 9 animals",
+    wordLabel: "Animal",
+    sentenceLabel: "I’m a ~",
+    alternateLabel: "Animal",
+
+    displayModeLabels: {
+      pictureText: "Picture + word",
+      picture: "Picture only",
+      pictureSentence: "Picture + I’m a ~",
+      text: "Word only"
+    },
+
+    pictureAspectRatio: "1 / 1",
+
+    autoSeconds: 3,
+    autoSecondsMinimum: 1,
+    autoSecondsMaximum: 5,
+
+    cards
+  };
+})();

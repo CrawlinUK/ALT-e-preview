@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" class="shared-unit-template">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALT-e — Classroom Tools</title>
+  <link rel="preload"
+        href="font/HandwritingWeCan-Medium.otf?v=20261013-book2-unit2-images"
+        as="font"
+        type="font/otf"
+        crossorigin>
+  <link rel="preload" href="images/ui/AlsoHomeSweet.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
+  <link rel="preload" href="images/ui/AlsoBackArrow.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
+  <link rel="preload" href="images/ui/AlsoNewWindowIcon.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
+  <link rel="preload" href="images/ui/AlsoCogSettings.svg?v=20261013-book2-unit2-images" as="image" type="image/svg+xml">
+  <style>
+    #loadingScreen {
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #f8fbfa;
+      opacity: 1;
+      transition: opacity .24s ease;
+    }
+    #loadingScreen.loading-complete {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-panel {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      color: #263238;
+      font-family: Arial, sans-serif;
+    }
+    .loading-cogs {
+      position: relative;
+      width: 108px;
+      height: 78px;
+    }
+    .loading-cog {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 66px;
+      height: 66px;
+      font-size: 66px;
+      line-height: 1;
+      color: #00ada9;
+      transform-origin: center;
+      animation: alte-cog-clockwise 2.2s linear infinite;
+    }
+    .loading-cog:first-child {
+      left: 0;
+      top: 0;
+    }
+    .loading-cog:last-child {
+      right: 0;
+      bottom: 0;
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
+      color: #56666a;
+      animation-name: alte-cog-counterclockwise;
+      animation-duration: 1.75s;
+    }
+    #loadingLabel {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+    #loadingScreen.loading-error .loading-cog {
+      animation-play-state: paused;
+    }
+    @keyframes alte-cog-clockwise {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes alte-cog-counterclockwise {
+      to { transform: rotate(-360deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .loading-cog { animation-duration: 6s; }
+    }
+  </style>
+  <link rel="stylesheet" href="css/classroom.css?v=20261125-alte-v75">
+  <script src="js/unit-loader.js?v=20261125-alte-v75" defer></script>
+  <script src="js/theme.js?v=20261125-alte-v75"></script>
+</head>
+<body>
+  <div id="loadingScreen" role="status" aria-live="polite" aria-label="Loading">
+    <div class="loading-panel">
+      <div class="loading-cogs" aria-hidden="true">
+        <div class="loading-cog">⚙</div>
+        <div class="loading-cog">⚙</div>
+      </div>
+      <div id="loadingLabel">Loading…</div>
+    </div>
+  </div>
+  <div id="alteApp"></div>
+  <noscript>This classroom app requires JavaScript.</noscript>
+</body>
+</html>
